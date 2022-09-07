@@ -11,23 +11,28 @@ using VContainer;
 public class InputController : MonoBehaviour
 {
     private bool _isFire;
+    private readonly Subject<InputState> _inputSub = new();
+    public IObservable<InputState> InputSub => _inputSub;
 
-    private IPublisher<InputState> _publisher;
 
-    [Inject]
-    private void Constructor(IPublisher<InputState> publisher)
+    public enum InputState
     {
-        _publisher = publisher;
+        OnInput,
+        EndInput
     }
 
     public void OnFire(InputAction.CallbackContext context)
     {
-        _isFire = context.phase switch
+        switch (context.phase)
         {
-            InputActionPhase.Performed => true,
-            InputActionPhase.Canceled => false,
-            _ => _isFire
-        };
+            case InputActionPhase.Performed:
+                _isFire = true;
+                break;
+            case InputActionPhase.Canceled when _isFire:
+                _isFire = false;
+                _inputSub.OnNext(InputState.EndInput);
+                break;
+        }
     }
 
     private void Awake()
@@ -36,7 +41,7 @@ public class InputController : MonoBehaviour
             .Where(_ => _isFire)
             .Subscribe(_ =>
             {
-                _publisher.Publish(new InputState(true));
+                _inputSub.OnNext(InputState.OnInput);
             });
     }
 }
