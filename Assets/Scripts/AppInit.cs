@@ -2,21 +2,18 @@
 using MessagePipe;
 using VContainer.Unity;
 
-namespace DefaultNamespace
+public class AppInit : IStartable
 {
-    public class AppInit : IStartable
-    {
-        private readonly IPublisher<PlayingState> _statePub;
+    private readonly IPublisher<PlayingState> _statePub;
 
-        public AppInit(IPublisher<PlayingState> statePub)
-        {
-            _statePub = statePub;
-        }
+    public AppInit(IPublisher<PlayingState> statePub)
+    {
+        _statePub = statePub;
+    }
         
-        public async void Start()
-        {
-            await UniTask.DelayFrame(1);
-            _statePub.Publish(PlayingState.Menu);
-        }
+    public async void Start()
+    {
+        await UniTask.DelayFrame(1);
+        _statePub.Publish(PlayingState.Menu);
     }
 }

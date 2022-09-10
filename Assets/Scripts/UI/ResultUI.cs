@@ -1,6 +1,4 @@
-﻿using System;
-using DefaultNamespace;
-using MessagePipe;
+﻿using MessagePipe;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;

@@ -1,6 +1,4 @@
 ﻿using System;
-using Cysharp.Threading.Tasks;
-using DefaultNamespace;
 using DG.Tweening;
 using MessagePipe;
 using UniRx;

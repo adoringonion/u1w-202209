@@ -1,13 +1,10 @@
-﻿namespace DefaultNamespace
+﻿public enum PlayingState
 {
-    public enum PlayingState
-    {
-        Menu,
-        Description,
-        Start,
-        Wait,
-        Play,
-        End,
-        Retry,
-    }
+    Menu,
+    Description,
+    Start,
+    Wait,
+    Play,
+    End,
+    Retry,
 }

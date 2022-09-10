@@ -2,7 +2,7 @@
 using VContainer;
 using VContainer.Unity;
 
-namespace DefaultNamespace.DIContainer
+namespace DIContainer
 {
     public class PlayingLifetimeScope : LifetimeScope
     {

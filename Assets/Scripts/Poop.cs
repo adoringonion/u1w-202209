@@ -1,25 +1,22 @@
-﻿namespace DefaultNamespace
+﻿public class Poop
 {
-    public class Poop
+    public float Volume
     {
-        public float Volume
-        {
-            get;
-        }
+        get;
+    }
 
-        public Poop(float volume)
-        {
-            Volume = volume;
-        }
+    public Poop(float volume)
+    {
+        Volume = volume;
+    }
 
-        public Poop Add(Poop poop)
-        {
-            return new Poop(Volume + poop.Volume);
-        }
+    public Poop Add(Poop poop)
+    {
+        return new Poop(Volume + poop.Volume);
+    }
 
-        public ScoreManager.Score ToScore()
-        {
-            return new ScoreManager.Score(Volume);
-        }
+    public ScoreManager.Score ToScore()
+    {
+        return new ScoreManager.Score(Volume);
     }
 }
