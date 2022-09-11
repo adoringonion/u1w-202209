@@ -19,6 +19,8 @@ namespace UI
         [SerializeField] private PlayingUI playingUI;
         [SerializeField] private Canvas resultUI;
         [SerializeField] private Image loading;
+        [SerializeField] private GameObject toilet;
+        [SerializeField] private GameObject inu;
 
 
         private Sequence seq;
@@ -55,11 +57,15 @@ namespace UI
                         playingUI.gameObject.SetActive(true);
                         playingUI.SetDescPanelActive(false);
                         //seq.Play();
-                        Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(_ =>
-                        {
-                            _statePub.Publish(PlayingState.Play);
-                            Debug.Log(_roundManager.CurrentRound());
-                        });
+                        var s = DOTween.Sequence()
+                            .Append(toilet.transform.DOMove(Vector3.zero, 1f))
+                            .Join(toilet.transform.DOScale(new Vector3(0.65f, 0.65f), 1f))
+                            .Insert(1f, inu.transform.DOMoveY(1f, 1f).SetEase(Ease.OutBounce))
+                            .OnComplete(() =>
+                            {
+                                _statePub.Publish(PlayingState.Play);
+                                Debug.Log(_roundManager.CurrentRound());
+                            });
                         break;
                     case PlayingState.Wait:
                         //seq.Play();
