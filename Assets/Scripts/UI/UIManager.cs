@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using DG.Tweening;
 using MessagePipe;
+using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +16,9 @@ namespace UI
         private IPublisher<PlayingState> _statePub;
 
         private RoundManager _roundManager;
+        private ScoreManager _scoreManager;
+
+        private Vector3 _scoreTextOrigin;
 
         [SerializeField] private Menu menuUI;
         [SerializeField] private PlayingUI playingUI;
@@ -21,28 +26,39 @@ namespace UI
         [SerializeField] private Image loading;
         [SerializeField] private GameObject toilet;
         [SerializeField] private GameObject inu;
-
+        [SerializeField] private TMP_Text scoreText;
+        [SerializeField] private Image failImage;
 
         private Sequence seq;
 
         [Inject]
-        private void Constructor(ISubscriber<PlayingState> stateSub, IPublisher<PlayingState> statePub, RoundManager roundManager)
+        private void Constructor(ISubscriber<PlayingState> stateSub, IPublisher<PlayingState> statePub, RoundManager roundManager, ScoreManager scoreManager)
         {
             _stateSub = stateSub;
             _statePub = statePub;
             _roundManager = roundManager;
-            
-            
+            _scoreManager = scoreManager;
         }
 
         private void Start()
         {
-
+            _scoreTextOrigin = scoreText.gameObject.transform.position;
+            var originToiletScale = toilet.transform.localScale;
+            var originToiletPosition = toilet.transform.position;
+            var originInuPosition = inu.transform.position;
+            var originFailScale = failImage.transform.localScale;
+            
             _stateSub.Subscribe(state =>
             {
+
+                
                 switch (state)
                 {
                     case PlayingState.Menu:
+                        DOTween.Sequence()
+                            .Append(toilet.transform.DOScale(originToiletScale, 1f))
+                            .Join(toilet.transform.DOMove(originToiletPosition, 1f));
+                        inu.SetActive(false);
                         menuUI.gameObject.SetActive(true);
                         playingUI.gameObject.SetActive(false);
                         resultUI.gameObject.SetActive(false);
@@ -53,11 +69,15 @@ namespace UI
                         playingUI.SetDescPanelActive(true);
                         break;
                     case PlayingState.Start:
+                        inu.SetActive(true);
+                        inu.transform.DOMoveX(-1000, 0.1f).OnComplete(() =>
+                        {
+                            inu.transform.position = originInuPosition;
+                        });
                         resultUI.gameObject.SetActive(false);
                         playingUI.gameObject.SetActive(true);
                         playingUI.SetDescPanelActive(false);
-                        //seq.Play();
-                        var s = DOTween.Sequence()
+                        DOTween.Sequence()
                             .Append(toilet.transform.DOMove(Vector3.zero, 1f))
                             .Join(toilet.transform.DOScale(new Vector3(0.65f, 0.65f), 1f))
                             .Insert(1f, inu.transform.DOMoveY(1f, 1f).SetEase(Ease.OutBounce))
@@ -68,13 +88,32 @@ namespace UI
                             });
                         break;
                     case PlayingState.Wait:
-                        //seq.Play();
-                        Observable.Timer(TimeSpan.FromSeconds(1)).Subscribe(_ =>
-                        {
-                            _statePub.Publish(_roundManager.IsRoundEnd() ? PlayingState.End : PlayingState.Play);
 
-                            Debug.Log(_roundManager.CurrentRound());
-                        });
+                        if (_scoreManager.IsFail())
+                        {
+                            failImage.transform.localScale = originToiletScale * 10f;
+                            failImage.gameObject.SetActive(true);
+                            failImage.transform.DOScale(originFailScale, 1f).SetEase(Ease.OutQuint).OnComplete(() =>
+                            {
+                                failImage.gameObject.SetActive(false);
+                                failImage.transform.localScale = originFailScale;
+                                _statePub.Publish(_roundManager.IsRoundEnd() ? PlayingState.End : PlayingState.Play);
+                            });
+                            
+                        }
+                        else
+                        {
+                            scoreText.text = _scoreManager.GetLastScore().ToString(CultureInfo.InvariantCulture);
+                            DOTween.Sequence()
+                                .Append(scoreText.gameObject.transform.DOLocalMove(Vector3.zero, 0.4f).SetEase(Ease.Linear))
+                                .Insert(1.1f,
+                                    scoreText.gameObject.transform.DOLocalMoveX(-_scoreTextOrigin.x, 0.4f).SetEase(Ease.Linear))
+                                .OnComplete(() =>
+                                {
+                                    scoreText.gameObject.transform.position = _scoreTextOrigin;
+                                    _statePub.Publish(_roundManager.IsRoundEnd() ? PlayingState.End : PlayingState.Play);
+                                });
+                        }
                         break;
                     case PlayingState.End:
                         resultUI.gameObject.SetActive(true);

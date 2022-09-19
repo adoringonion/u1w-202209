@@ -30,7 +30,15 @@ public class PoopReceiver : MonoBehaviour
     {
         poopOutputController.PoopEndSub.Subscribe(poop =>
         {
-            Debug.Log(poop.Volume);
+            if (poop.Volume > poopThreshold)
+            {
+                _scoreManager.Add(-1f);
+            }
+            else
+            {
+                _scoreManager.Add(poop.Volume);
+            }
+  
             _statePub.Publish(PlayingState.Wait);
         });
     }
