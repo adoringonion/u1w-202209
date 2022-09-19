@@ -8,23 +8,16 @@ public class PoopReceiver : MonoBehaviour
     [SerializeField] private float poopThreshold = 100f;
     [SerializeField] private PoopOutputController poopOutputController;
     private ScoreManager _scoreManager;
-    private RoundManager _roundManager;
     private IPublisher<PlayingState> _statePub;
-
-    private Poop _poop;
+    private Poop _currentPoop;
 
     [Inject]
-    private void Constructor(IPublisher<PlayingState> statePub, ScoreManager scoreManager, RoundManager roundManager)
+    private void Constructor(IPublisher<PlayingState> statePub, ScoreManager scoreManager)
     {
         _statePub = statePub;
         _scoreManager = scoreManager;
-        _roundManager = roundManager;
     }
 
-    private void Awake()
-    {
-        _poop = new Poop(0f);
-    }
 
     private void Start()
     {
@@ -38,7 +31,9 @@ public class PoopReceiver : MonoBehaviour
             {
                 _scoreManager.Add(poop.Volume);
             }
-  
+
+            poop.Kill().Forget();
+            
             _statePub.Publish(PlayingState.Wait);
         });
     }

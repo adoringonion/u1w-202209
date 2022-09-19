@@ -8,12 +8,15 @@ public class PoopOutputController : MonoBehaviour
 {
     [SerializeField] private float poopVolume = 1.0f;
     [SerializeField] private InputController inputController;
+    [SerializeField] private Poop poopObject;
+    [SerializeField] private Inu inu;
+    [SerializeField] private Toilet toilet;
 
-    private readonly ReactiveProperty<Poop> _poop = new(new Poop(0f));
-    public IObservable<Poop> PoopSub => _poop;
-
-    private readonly Subject<Poop> _poopEndSub = new Subject<Poop>();
+    private readonly Subject<Poop> _poopEndSub = new();
     public IObservable<Poop> PoopEndSub => _poopEndSub;
+
+    private readonly FloatReactiveProperty _inputValue = new();
+    public IObservable<float> InputValue => _inputValue;
 
     private ISubscriber<PlayingState> _stateSub;
 
@@ -33,16 +36,21 @@ public class PoopOutputController : MonoBehaviour
             .Where(_ => _isActive)
             .Subscribe(state =>
             {
-                _poop.Value = _poop.Value.Add(new Poop(poopVolume));
+                _inputValue.Value += poopVolume;
             });
 
         inputController.InputSub
             .Where(state => state == InputController.InputState.EndInput)
             .Where(_ => _isActive)
-            .Subscribe(_ =>
+            .Subscribe(async _ =>
             {
                 _isActive = false;
-                _poopEndSub.OnNext(_poop.Value);
+                var poop = Instantiate(poopObject);
+                poop.Init(_inputValue.Value, inu.EjectPos);
+                poop.SetToiletPos(toilet.LandPos, toilet.BanishPos);
+                await poop.EjectAnim();
+                
+                _poopEndSub.OnNext(poop);
             });
 
         _stateSub.Subscribe(state =>
@@ -55,7 +63,7 @@ public class PoopOutputController : MonoBehaviour
 
             if (state is PlayingState.Play)
             {
-                _poop.Value = new Poop(0f);
+                _inputValue.Value = 0f;
             }
         });
     }

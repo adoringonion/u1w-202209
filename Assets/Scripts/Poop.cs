@@ -1,22 +1,42 @@
-﻿public class Poop
-{
-    public float Volume
-    {
-        get;
-    }
+﻿using System;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
+using UnityEngine;
 
-    public Poop(float volume)
+public class Poop : MonoBehaviour
+{
+    public float Volume { get; private set; }
+
+    private Vector3 _landPos;
+    private Vector3 _banishPos;
+
+
+    public void Init(float volume, Vector3 position)
     {
         Volume = volume;
+        gameObject.transform.position = position;
     }
 
-    public Poop Add(Poop poop)
+    public void SetToiletPos(Vector3 landPos, Vector3 banishPos)
     {
-        return new Poop(Volume + poop.Volume);
+        _landPos = landPos;
+        _banishPos = banishPos;
     }
 
-    public ScoreManager.Score ToScore()
+
+    public async UniTask EjectAnim()
     {
-        return new ScoreManager.Score(Volume);
+        await DOTween.Sequence()
+            .Append(gameObject.transform.DOMove(_landPos, 0.2f).SetEase(Ease.Linear))
+            .Insert(0.5f, gameObject.transform.DOMove(_banishPos, 0.2f).SetEase(Ease.Flash))
+            .AsyncWaitForCompletion();
     }
+
+    public async UniTaskVoid Kill()
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(1));
+        Destroy(gameObject);
+    }
+    
+    
 }
