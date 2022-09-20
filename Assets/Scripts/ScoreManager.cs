@@ -36,6 +36,11 @@ public class ScoreManager
         return _scores.Select(score => score.Value).ToArray();
     }
 
+    public float GetHighestScore()
+    {
+        return _scores.Select(score => score.Value).Max();
+    }
+
     public bool IsFail()
     {
         return _scores.Last().Value < 0;
