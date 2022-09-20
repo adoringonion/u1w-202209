@@ -16,7 +16,7 @@ public class Poop : MonoBehaviour
         Volume = volume;
         var o = gameObject;
         o.transform.position = position;
-        o.transform.localScale = Vector3.one * (volume / 50);
+        o.transform.localScale = Vector3.one * (volume / 300);
     }
 
     public void SetToiletPos(Vector3 landPos, Vector3 banishPos)

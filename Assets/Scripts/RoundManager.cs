@@ -14,8 +14,8 @@ public class RoundManager
         _statePub = statePub;
         NextRound();
     }
-        
-    public enum Round
+
+    private enum Round
     {
         Ready,
         First,
@@ -24,9 +24,19 @@ public class RoundManager
         End,
     }
 
-    public Round CurrentRound()
+    public string CurrentRound()
     {
-        return _round;
+        switch (_round)
+        {
+            case Round.First:
+                return "ROUND 1";
+            case Round.Second:
+                return "ROUND 2";
+            case Round.Third:
+                return "ROUND 3";
+            default:
+                return "";
+        }
     }
 
     public bool IsRoundEnd()

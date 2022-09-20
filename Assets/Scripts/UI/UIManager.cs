@@ -23,7 +23,7 @@ namespace UI
         [SerializeField] private Menu menuUI;
         [SerializeField] private PlayingUI playingUI;
         [SerializeField] private Canvas resultUI;
-        [SerializeField] private Image loading;
+        [SerializeField] private TMP_Text round;
         [SerializeField] private GameObject toilet;
         [SerializeField] private GameObject inu;
         [SerializeField] private TMP_Text scoreText;
@@ -69,6 +69,7 @@ namespace UI
                         playingUI.SetDescPanelActive(true);
                         break;
                     case PlayingState.Start:
+                        round.text = "";
                         inu.SetActive(true);
                         inu.transform.DOMoveX(-1000, 1f).OnComplete(() =>
                         {
@@ -85,7 +86,9 @@ namespace UI
                             .AsyncWaitForCompletion();
              
                         _statePub.Publish(PlayingState.Play);
-                        Debug.Log(_roundManager.CurrentRound());
+                        break;
+                    case PlayingState.Play:
+                        round.text = _roundManager.CurrentRound();
                         break;
                     case PlayingState.Wait:
 
@@ -113,6 +116,7 @@ namespace UI
                         }
                         break;
                     case PlayingState.End:
+                        round.text = "";
                         resultUI.gameObject.SetActive(true);
                         playingUI.gameObject.SetActive(false);
                         break;
