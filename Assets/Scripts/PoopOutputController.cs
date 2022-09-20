@@ -6,7 +6,8 @@ using VContainer;
 
 public class PoopOutputController : MonoBehaviour
 {
-    [SerializeField] private float poopVolume = 1.0f;
+    private const float PoopVolume = 1.0f;
+    private const float MaxInputValue = 100f;
     [SerializeField] private InputController inputController;
     [SerializeField] private Poop poopObject;
     [SerializeField] private Inu inu;
@@ -34,9 +35,10 @@ public class PoopOutputController : MonoBehaviour
         inputController.InputSub
             .Where(state =>  state == InputController.InputState.OnInput)
             .Where(_ => _isActive)
+            .Where(_ => _inputValue.Value < MaxInputValue)
             .Subscribe(state =>
             {
-                _inputValue.Value += poopVolume;
+                _inputValue.Value += PoopVolume;
             });
 
         inputController.InputSub

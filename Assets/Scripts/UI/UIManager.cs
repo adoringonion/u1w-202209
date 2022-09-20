@@ -48,7 +48,7 @@ namespace UI
             var originInuPosition = inu.transform.position;
             var originFailScale = failImage.transform.localScale;
             
-            _stateSub.Subscribe(state =>
+            _stateSub.Subscribe(async state =>
             {
 
                 
@@ -70,22 +70,22 @@ namespace UI
                         break;
                     case PlayingState.Start:
                         inu.SetActive(true);
-                        inu.transform.DOMoveX(-1000, 0.1f).OnComplete(() =>
+                        inu.transform.DOMoveX(-1000, 1f).OnComplete(() =>
                         {
                             inu.transform.position = originInuPosition;
                         });
                         resultUI.gameObject.SetActive(false);
                         playingUI.gameObject.SetActive(true);
                         playingUI.SetDescPanelActive(false);
-                        DOTween.Sequence()
+                        await DOTween.Sequence()
                             .Append(toilet.transform.DOMove(Vector3.zero, 1f))
-                            .Join(toilet.transform.DOScale(new Vector3(0.65f, 0.65f), 1f))
-                            .Insert(1f, inu.transform.DOMoveY(1f, 1f).SetEase(Ease.OutBounce))
-                            .OnComplete(() =>
-                            {
-                                _statePub.Publish(PlayingState.Play);
-                                Debug.Log(_roundManager.CurrentRound());
-                            });
+                            .Join(toilet.transform.DOScale(new Vector3(0.65f, 0.65f), 1f)).AsyncWaitForCompletion();
+                        await DOTween.Sequence()
+                            .Append(inu.transform.DOMoveY(1f, 1f).SetEase(Ease.OutBounce))
+                            .AsyncWaitForCompletion();
+             
+                        _statePub.Publish(PlayingState.Play);
+                        Debug.Log(_roundManager.CurrentRound());
                         break;
                     case PlayingState.Wait:
 
@@ -93,26 +93,23 @@ namespace UI
                         {
                             failImage.transform.localScale = originToiletScale * 10f;
                             failImage.gameObject.SetActive(true);
-                            failImage.transform.DOScale(originFailScale, 1f).SetEase(Ease.OutQuint).OnComplete(() =>
-                            {
-                                failImage.gameObject.SetActive(false);
-                                failImage.transform.localScale = originFailScale;
-                                _statePub.Publish(_roundManager.IsRoundEnd() ? PlayingState.End : PlayingState.Play);
-                            });
-                            
+                            await failImage.transform.DOScale(originFailScale, 1f).SetEase(Ease.OutQuint)
+                                .AsyncWaitForCompletion();
+                            failImage.gameObject.SetActive(false);
+                            failImage.transform.localScale = originFailScale;
+                            _statePub.Publish(_roundManager.IsRoundEnd() ? PlayingState.End : PlayingState.Play);
+
                         }
                         else
                         {
                             scoreText.text = _scoreManager.GetLastScore().ToString(CultureInfo.InvariantCulture);
-                            DOTween.Sequence()
+                            await DOTween.Sequence()
                                 .Append(scoreText.gameObject.transform.DOLocalMove(Vector3.zero, 0.4f).SetEase(Ease.Linear))
                                 .Insert(1.1f,
-                                    scoreText.gameObject.transform.DOLocalMoveX(-_scoreTextOrigin.x, 0.4f).SetEase(Ease.Linear))
-                                .OnComplete(() =>
-                                {
-                                    scoreText.gameObject.transform.position = _scoreTextOrigin;
-                                    _statePub.Publish(_roundManager.IsRoundEnd() ? PlayingState.End : PlayingState.Play);
-                                });
+                                    scoreText.gameObject.transform.DOLocalMoveX(-_scoreTextOrigin.x, 0.4f).SetEase(Ease.Linear)).AsyncWaitForCompletion();
+                            scoreText.gameObject.transform.position = _scoreTextOrigin;
+                            _statePub.Publish(_roundManager.IsRoundEnd() ? PlayingState.End : PlayingState.Play);
+                            
                         }
                         break;
                     case PlayingState.End:

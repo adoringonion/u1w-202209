@@ -14,7 +14,9 @@ public class Poop : MonoBehaviour
     public void Init(float volume, Vector3 position)
     {
         Volume = volume;
-        gameObject.transform.position = position;
+        var o = gameObject;
+        o.transform.position = position;
+        o.transform.localScale = Vector3.one * (volume / 50);
     }
 
     public void SetToiletPos(Vector3 landPos, Vector3 banishPos)
@@ -32,9 +34,9 @@ public class Poop : MonoBehaviour
             .AsyncWaitForCompletion();
     }
 
-    public async UniTaskVoid Kill()
+    public async UniTaskVoid Kill(double time)
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(1));
+        await UniTask.Delay(TimeSpan.FromSeconds(time));
         Destroy(gameObject);
     }
     

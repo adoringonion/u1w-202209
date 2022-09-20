@@ -6,7 +6,7 @@ using VContainer;
 
 public class Inu : MonoBehaviour
 {
-    [SerializeField] private InputController _inputController;
+    [SerializeField] private InputController inputController;
     [SerializeField] private Transform ejectPos;
 
     public Vector3 EjectPos => ejectPos.position;
@@ -37,7 +37,7 @@ public class Inu : MonoBehaviour
             };
         });
 
-        _inputController.InputSub
+        inputController.InputSub
             .Where(_ => _isActive)
             .Where(_ => !_isShake)
             .Subscribe(_ =>
@@ -50,7 +50,7 @@ public class Inu : MonoBehaviour
                     });
             });
 
-        _inputController.InputSub
+        inputController.InputSub
             .Where(state => state == InputController.InputState.OnInput)
             .Where(_ => _isActive)
             .Where(_ => gameObject.transform.localScale.x > _minScale.x)
@@ -60,7 +60,7 @@ public class Inu : MonoBehaviour
                 gameObject.transform.localScale = new Vector3(c.x - 0.01f, c.y - 0.01f);
             });
 
-        _inputController.InputSub
+        inputController.InputSub
             .Where(state => state == InputController.InputState.EndInput)
             .Subscribe(_ =>
             {

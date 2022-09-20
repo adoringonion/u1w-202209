@@ -5,7 +5,7 @@ using VContainer;
 
 public class PoopReceiver : MonoBehaviour
 {
-    [SerializeField] private float poopThreshold = 100f;
+    private const float PoopThreshold = 80f;
     [SerializeField] private PoopOutputController poopOutputController;
     private ScoreManager _scoreManager;
     private IPublisher<PlayingState> _statePub;
@@ -23,17 +23,17 @@ public class PoopReceiver : MonoBehaviour
     {
         poopOutputController.PoopEndSub.Subscribe(poop =>
         {
-            if (poop.Volume > poopThreshold)
+            if (poop.Volume > PoopThreshold)
             {
+                poop.Kill(1f).Forget();
                 _scoreManager.Add(-1f);
             }
             else
-            {
+            {       
+                poop.Kill(0.1f).Forget();
                 _scoreManager.Add(poop.Volume);
             }
 
-            poop.Kill().Forget();
-            
             _statePub.Publish(PlayingState.Wait);
         });
     }
