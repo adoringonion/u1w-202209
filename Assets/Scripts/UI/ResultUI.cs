@@ -12,13 +12,14 @@ namespace UI
     {
         [SerializeField] private Button retryButton;
         [SerializeField] private Button backMenuButton;
-
+        [SerializeField] private Button ranking;
+        
         [SerializeField] private TMP_Text score1;
         [SerializeField] private TMP_Text score2;
         [SerializeField] private TMP_Text score3;
         [SerializeField] private TMP_Text highestScore;
         [SerializeField] private Image failImage;
-        [SerializeField] private Button ranking;
+        
 
 
         private IPublisher<PlayingState> _publisher;
@@ -61,6 +62,12 @@ namespace UI
                     highestScore.gameObject.SetActive(true);
                     failImage.gameObject.SetActive(false);
                     _publisher.Publish(PlayingState.Menu);
+                });
+
+            ranking.OnClickAsObservable()
+                .Subscribe(_ =>
+                {
+                    naichilab.RankingLoader.Instance.SendScoreAndShowRanking(_scoreManager.GetHighestScore());
                 });
         }
 
