@@ -18,6 +18,7 @@ namespace UI
         [SerializeField] private TMP_Text score3;
         [SerializeField] private TMP_Text highestScore;
         [SerializeField] private Image failImage;
+        [SerializeField] private Button ranking;
 
 
         private IPublisher<PlayingState> _publisher;
@@ -34,7 +35,7 @@ namespace UI
 
         private void Start()
         {
-
+            
 
             _subscriber.Subscribe(state =>
             {
@@ -65,6 +66,7 @@ namespace UI
 
         private void ShowResult()
         {
+            var originFailImageScale = failImage.gameObject.transform.localScale;
             var right = Vector3.right * 1000;
             score1.transform.parent.position = score1.transform.parent.position += right;
             score2.transform.parent.position = score2.transform.parent.position += right;
@@ -79,19 +81,33 @@ namespace UI
             var highest = _scoreManager.GetHighestScore();
             if (highest < 0)
             {
-                highestScore.gameObject.SetActive(false);
-                failImage.gameObject.SetActive(true);
+                highestScore.gameObject.transform.parent.gameObject.SetActive(false);
+                ranking.gameObject.SetActive(false);
             }
             else
             {
+                highestScore.gameObject.transform.parent.gameObject.SetActive(true);
                 highestScore.text = highest.ToString();
+                ranking.gameObject.SetActive(true);
             }
             
-            DOTween.Sequence()
+            var s = DOTween.Sequence()
                 .Append(score1.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint))
                 .Insert(0.2f, score2.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint))
                 .Insert(0.4f, score3.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint))
                 .Insert(0.6f, highestScore.transform.parent.DOLocalMoveX(210.8f, 0.5f).SetEase(Ease.InOutQuint));
+            
+            if (highest < 0)
+            {
+                failImage.gameObject.transform.localScale = originFailImageScale * 15f;
+                s.Insert(0.8f,
+                    failImage.gameObject.transform.DOScale(originFailImageScale, 0.2f).SetEase(Ease.OutElastic));
+                failImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                s.Play();
+            }
         }
     }
 }
