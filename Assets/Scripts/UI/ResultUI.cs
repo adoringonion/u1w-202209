@@ -1,4 +1,6 @@
-﻿using DG.Tweening;
+﻿using System.Globalization;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using MessagePipe;
 using TMPro;
 using UniRx;
@@ -19,6 +21,8 @@ namespace UI
         [SerializeField] private TMP_Text score3;
         [SerializeField] private TMP_Text highestScore;
         [SerializeField] private Image failImage;
+        [SerializeField] private AudioSource shuSound;
+        [SerializeField] private AudioSource failSound;
         
 
 
@@ -90,30 +94,33 @@ namespace UI
             {
                 highestScore.gameObject.transform.parent.gameObject.SetActive(false);
                 ranking.gameObject.SetActive(false);
+                score1.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint)
+                    .OnPlay(shuSound.Play);
+                score2.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint).SetDelay(0.2f)
+                    .OnPlay(shuSound.Play);
+                score3.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint).SetDelay(0.4f)
+                    .OnPlay(shuSound.Play)
+                    .OnComplete(() =>
+                    {
+                        failImage.gameObject.transform.localScale = originFailImageScale * 15f;
+                        failImage.gameObject.transform.DOScale(originFailImageScale, 0.2f).SetEase(Ease.OutElastic);
+                        failImage.gameObject.SetActive(true);
+                        failSound.Play();
+                    });
             }
             else
             {
                 highestScore.gameObject.transform.parent.gameObject.SetActive(true);
                 highestScore.text = highest.ToString();
                 ranking.gameObject.SetActive(true);
-            }
-            
-            var s = DOTween.Sequence()
-                .Append(score1.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint))
-                .Insert(0.2f, score2.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint))
-                .Insert(0.4f, score3.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint))
-                .Insert(0.6f, highestScore.transform.parent.DOLocalMoveX(210.8f, 0.5f).SetEase(Ease.InOutQuint));
-            
-            if (highest < 0)
-            {
-                failImage.gameObject.transform.localScale = originFailImageScale * 15f;
-                s.Insert(0.8f,
-                    failImage.gameObject.transform.DOScale(originFailImageScale, 0.2f).SetEase(Ease.OutElastic));
-                failImage.gameObject.SetActive(true);
-            }
-            else
-            {
-                s.Play();
+                score1.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint)
+                    .OnPlay(shuSound.Play);
+                score2.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint).SetDelay(0.2f)
+                    .OnPlay(shuSound.Play);
+                score3.transform.parent.DOLocalMoveX(22.77885f, 0.5f).SetEase(Ease.InOutQuint).SetDelay(0.4f)
+                    .OnPlay(shuSound.Play);
+                highestScore.transform.parent.DOLocalMoveX(210.8f, 0.5f).SetEase(Ease.InOutQuint).SetDelay(0.6f)
+                    .OnPlay(shuSound.Play);
             }
         }
     }

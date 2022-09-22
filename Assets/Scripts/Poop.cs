@@ -9,6 +9,7 @@ public class Poop : MonoBehaviour
 
     private Vector3 _landPos;
     private Vector3 _banishPos;
+    [SerializeField] private AudioSource flushSound;
 
 
     public void Init(float volume, Vector3 position)
@@ -30,7 +31,8 @@ public class Poop : MonoBehaviour
     {
         await DOTween.Sequence()
             .Append(gameObject.transform.DOMove(_landPos, 0.2f).SetEase(Ease.Linear))
-            .Insert(0.5f, gameObject.transform.DOMove(_banishPos, 0.2f).SetEase(Ease.Flash))
+            .Insert(0.5f, gameObject.transform.DOMove(_banishPos, 0.5f).SetEase(Ease.InOutCubic))
+            .InsertCallback(0.5f, flushSound.Play)
             .AsyncWaitForCompletion();
     }
 

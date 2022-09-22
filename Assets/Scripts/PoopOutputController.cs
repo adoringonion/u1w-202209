@@ -12,6 +12,7 @@ public class PoopOutputController : MonoBehaviour
     [SerializeField] private Poop poopObject;
     [SerializeField] private Inu inu;
     [SerializeField] private Toilet toilet;
+    [SerializeField] private AudioSource hurue;
 
     private readonly Subject<Poop> _poopEndSub = new();
     public IObservable<Poop> PoopEndSub => _poopEndSub;
@@ -47,12 +48,24 @@ public class PoopOutputController : MonoBehaviour
             .Subscribe(async _ =>
             {
                 _isActive = false;
+                hurue.Stop();
                 var poop = Instantiate(poopObject);
                 poop.Init(_inputValue.Value, inu.EjectPos);
                 poop.SetToiletPos(toilet.LandPos, toilet.BanishPos);
                 await poop.EjectAnim();
                 
                 _poopEndSub.OnNext(poop);
+            });
+
+        inputController.InputSub
+            .DistinctUntilChanged()
+            .Where(_ => _isActive)
+            .Subscribe(state =>
+            {
+                if (state == InputController.InputState.OnInput)
+                {
+                    hurue.Play();
+                }
             });
 
         _stateSub.Subscribe(state =>

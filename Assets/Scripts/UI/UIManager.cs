@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using MessagePipe;
 using TMPro;
@@ -94,14 +95,14 @@ namespace UI
 
                         if (_scoreManager.IsFail())
                         {
-                            failImage.transform.localScale = originToiletScale * 10f;
+                            failImage.transform.localScale = originToiletScale * 8f;
                             failImage.gameObject.SetActive(true);
-                            await failImage.transform.DOScale(originFailScale, 1f).SetEase(Ease.OutQuint)
+                            await failImage.transform.DOScale(originFailScale, 0.5f).SetEase(Ease.OutQuint)
                                 .AsyncWaitForCompletion();
+                            await UniTask.Delay(TimeSpan.FromSeconds(0.5));
                             failImage.gameObject.SetActive(false);
                             failImage.transform.localScale = originFailScale;
                             _statePub.Publish(_roundManager.IsRoundEnd() ? PlayingState.End : PlayingState.Play);
-
                         }
                         else
                         {
